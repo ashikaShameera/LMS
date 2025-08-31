@@ -1,0 +1,16 @@
+node_modules/
+
+# Maven build output
+target/
+*.class
+*.log
+
+
+# IntelliJ IDEA project files
+.idea/
+*.iml
+*.iws
+*.ipr
+
+.DS_Store
+Thumbs.db
