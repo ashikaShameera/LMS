@@ -1,20 +1,27 @@
 import React from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import AuthService from "../services/AuthService";
 
 /**
  * Simple Admin layout reusing the same CSS grid as student/instructor.
  * Sidebar shows 4 pages: Dashboard, Course Management, Instructor Management, Student Management.
  */
 export default function AdminDashboardLayout() {
+  const navigate = useNavigate();
+  const onLogout = () => {
+    AuthService.logout();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <div className="container-fluid p-0 student-shell">
       {/* Sidebar */}
       <aside className="student-sidebar border-end bg-dark text-white">
         <div className="px-3 py-3 d-flex align-items-center gap-2 border-bottom border-secondary">
           <div className="brand-icon rounded bg-primary text-white fw-bold d-grid place-center">
-            UC
+            SL
           </div>
-          <div className="fw-semibold">UniCourse Admin</div>
+          <div className="fw-semibold">University of Kelaniya</div>
         </div>
 
         <div className="p-3">
@@ -36,7 +43,7 @@ export default function AdminDashboardLayout() {
         </nav>
 
         <div className="mt-auto p-3 small border-top border-secondary">
-          <button className="btn btn-outline-light w-100">Logout</button>
+          <button className="btn btn-outline-light w-100" onClick={onLogout}>Logout</button>
         </div>
       </aside>
 

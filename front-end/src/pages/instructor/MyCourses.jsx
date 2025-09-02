@@ -1,23 +1,32 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";   // <--- added navigate
 import InstructorService from "../../services/InstructorService";
+import AuthService from "../../services/AuthService";
 
-/**
- * Shows instructor's assigned courses
- * Each card shows capacity + current enrolled count
- * "View Students" opens a popup table listing enrolled students
- */
 export default function MyCourses() {
-  const { instructorId } = useParams();
+  const { instructorId: routeInstructorId } = useParams();
+  const navigate = useNavigate();                             // <--- added
+
+  // Always trust the JWT for secure calls
+  const authInfo = React.useMemo(() => AuthService.getAuthInfo(), []);
+  const tokenInstructorId = authInfo?.instructorId ?? null;
+
+  // If URL param is present but doesn't match token, fix the URL (nice UX)
+  React.useEffect(() => {
+    if (routeInstructorId && tokenInstructorId && String(routeInstructorId) !== String(tokenInstructorId)) {
+      navigate(`/instructors/${tokenInstructorId}/courses`, { replace: true }); // <--- added
+    }
+  }, [routeInstructorId, tokenInstructorId, navigate]);
+
   const [page, setPage] = React.useState(0);
   const [size] = React.useState(6);
 
-  const [data, setData] = React.useState(null);           // Page<CourseDto> | null
-  const [counts, setCounts] = React.useState({});         // { [courseId]: number }
+  const [data, setData] = React.useState(null);
+  const [counts, setCounts] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [err, setErr] = React.useState(null);
 
-  // modal state
+  // modal state...
   const [showModal, setShowModal] = React.useState(false);
   const [selectedCourse, setSelectedCourse] = React.useState(null);
   const [studentsPage, setStudentsPage] = React.useState(null);
@@ -28,28 +37,34 @@ export default function MyCourses() {
     try {
       setLoading(true);
       setErr(null);
-      const pageData = await InstructorService.getAssignedCourses(instructorId, { page, size });
+
+      if (!tokenInstructorId) {
+        setData({ content: [], number: 0, totalPages: 1, last: true });
+        setLoading(false);
+        return;
+      }
+
+      // CHANGED: don't pass instructorId; service will use JWT iid
+      const pageData = await InstructorService.getAssignedCourses({ page, size });
       setData(pageData || { content: [], number: 0, totalPages: 1, last: true });
 
-      // fetch enrollment counts for courses shown on this page (safe defaults)
       const ids = (pageData?.content ?? []).map((c) => c.id);
       const results = await Promise.all(ids.map((id) => InstructorService.getEnrollmentCountByCourse(id)));
       const map = {};
       ids.forEach((id, idx) => (map[id] = results[idx] ?? 0));
       setCounts(map);
     } catch (e) {
-      console.error(e);
       setErr(e);
-      // ensure data has a safe shape so UI doesn't explode
       setData({ content: [], number: 0, totalPages: 1, last: true });
     } finally {
       setLoading(false);
     }
-  }, [instructorId, page, size]);
+  }, [tokenInstructorId, page, size]);
 
   React.useEffect(() => {
     load();
   }, [load]);
+
 
   const openStudents = async (course) => {
     setSelectedCourse(course);
@@ -61,7 +76,6 @@ export default function MyCourses() {
       const res = await InstructorService.getEnrollmentsByCourse(course.id, { page: 0, size: 100 });
       setStudentsPage(res || { content: [] });
     } catch (e) {
-      console.error(e);
       setStudentsErr(e);
       setStudentsPage({ content: [] });
     } finally {
@@ -84,7 +98,13 @@ export default function MyCourses() {
       <h2 className="h6 mb-3">My Courses</h2>
 
       {loading && <div className="text-muted">Loading courses…</div>}
-      {err && <div className="alert alert-danger">Failed to load courses.</div>}
+      {err && (
+        <div className="alert alert-danger">
+          {err?.response?.status === 403
+            ? "You are not authorized to view these courses. Please make sure you're signed in as the correct instructor."
+            : "Failed to load courses."}
+        </div>
+      )}
 
       {!loading && !err && (
         <>

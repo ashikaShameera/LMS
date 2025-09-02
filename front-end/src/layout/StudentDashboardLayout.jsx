@@ -1,9 +1,20 @@
 import React from "react";
-import { NavLink, Outlet, useParams } from "react-router-dom";
+import { NavLink, Outlet, useParams, useNavigate } from "react-router-dom";
 import StudentServise from "../services/StudentServise";
+import AuthService from "../services/AuthService";
+
+
 
 export default function StudentDashboardLayout() {
   const { studentId } = useParams();
+
+  const navigate = useNavigate();
+
+  const onLogout = () => {
+    AuthService.logout();
+    navigate("/login", { replace: true });
+  };
+
   const [student, setStudent] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
@@ -33,7 +44,7 @@ export default function StudentDashboardLayout() {
 <aside className="student-sidebar border-end bg-dark text-white">
   <div className="px-3 py-3 d-flex align-items-center gap-2 border-bottom border-secondary">
     <div className="brand-icon rounded bg-primary text-white fw-bold d-grid place-center">
-      UOK
+      SL
     </div>
     <div className="fw-semibold">University of Kelaniya</div>
   </div>
@@ -76,7 +87,7 @@ export default function StudentDashboardLayout() {
   </nav>
 
   <div className="mt-auto p-3 small border-top border-secondary">
-    <button className="btn btn-outline-light w-100">Logout</button>
+    <button className="btn btn-outline-light w-100" onClick={onLogout}>Logout</button>
   </div>
 </aside>
 

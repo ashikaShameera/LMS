@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;  // <-- added
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,31 +19,31 @@ public class GradeController {
 
     private final GradeService service;
 
-    /** Instructor records/updates a grade for a student in a course */
+    @PreAuthorize("hasRole('INSTRUCTOR')")
     @PostMapping
     public ResponseEntity<GradeDto> upsert(@Valid @RequestBody GradeUpsertRequest req) {
         return ResponseEntity.ok(service.upsert(req));
     }
 
-    /** Student (or admin) views all their course grades */
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('STUDENT') and #studentId == principal.studentId)")
     @GetMapping("/students/{studentId}")
-    public Page<GradeDto> listByStudent(@PathVariable Long studentId,
+    public Page<GradeDto> listByStudent(@P("studentId") @PathVariable Long studentId, // <-- added
                                         @RequestParam(defaultValue = "0") int page,
                                         @RequestParam(defaultValue = "20") int size) {
         return service.listByStudent(studentId, page, size);
     }
 
-    /** Admin/instructor can view grades for a course */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/courses/{courseId}")
-    public Page<GradeDto> listByCourse(@PathVariable Long courseId,
+    public Page<GradeDto> listByCourse(@P("courseId") @PathVariable Long courseId,    // <-- added
                                        @RequestParam(defaultValue = "0") int page,
                                        @RequestParam(defaultValue = "20") int size) {
         return service.listByCourse(courseId, page, size);
     }
 
-    /** Overall GPA/summary for a student */
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('STUDENT') and #studentId == principal.studentId)")
     @GetMapping("/students/{studentId}/summary")
-    public GradeSummaryDto summaryByStudent(@PathVariable Long studentId) {
+    public GradeSummaryDto summaryByStudent(@P("studentId") @PathVariable Long studentId) { // <-- added
         return service.summaryByStudent(studentId);
     }
 }
