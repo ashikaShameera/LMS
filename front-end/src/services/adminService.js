@@ -179,25 +179,97 @@ async function createInstructorWithUser(payload) {
   return created;
 }
 
+/** ===== Student Management (NEW) ===== */
+function listStudents({ page = 0, size = 10, q = "" } = {}) {
+  return api.get("/api/students", { params: { page, size, q } }).then(unpack);
+}
+function getStudentById(id) {
+  return api.get(`/api/students/${id}`).then(unpack);
+}
+function createStudent(payload) {
+  // payload: { studentNo, firstName, lastName, email, phone, address }
+  return api.post("/api/students", payload).then(unpack);
+}
+// NOTE: backend exposes PUT /api/students/{id}/profile for non-authoritative fields like phone/address
+function updateStudentProfile(id, payload) {
+  // payload: { phone, address }
+  return api.put(`/api/students/${id}/profile`, payload).then(unpack);
+}
+function deleteStudent(id) {
+  return api.delete(`/api/students/${id}`).then(unpack);
+}
+
+/** Student <-> Course (enroll/unenroll) */
+function listStudentCourses(studentId, { page = 0, size = 100 } = {}) {
+  return api.get(`/api/students/${studentId}/courses`, { params: { page, size } }).then(unpack);
+}
+function enrollStudentToCourse(studentId, courseId) {
+  return api.post(`/api/enrollments`, { studentId, courseId }).then(unpack);
+}
+function unenrollStudentFromCourse(studentId, courseId) {
+  return api.delete(`/api/enrollments`, { params: { studentId, courseId } }).then(unpack);
+}
+
+/**
+ * Create an AppUser for the student (role=STUDENT, default password = student123).
+ * Tries /api/admin/users then /api/users; fails silently if neither exists.
+ */
+async function createAppUserForStudent({ username, studentId, password = "student123" }) {
+  const body = { username, password, role: "STUDENT", studentId };
+
+  try {
+    await api.post("/api/admin/users", body).then(unpack);
+    return true;
+  } catch {}
+  try {
+    await api.post("/api/users", body).then(unpack);
+    return true;
+  } catch {}
+  return false;
+}
+
+/** Convenience: create student then auto-create linked AppUser. */
+async function createStudentWithUser(payload) {
+  const created = await createStudent(payload);
+  const email = payload?.email || created?.email;
+  if (created?.id && email) {
+    await createAppUserForStudent({ username: email, studentId: created.id, password: "student123" });
+  }
+  return created;
+}
+
 const AdminService = {
+  // dashboard
   getOverviewCounts,
+
+  // courses
   listCourses,
   getCourseById,
   createCourse,
   updateCourse,
   deleteCourse,
 
+  // instructors
   listInstructors,
   getInstructorById,
   createInstructor,
   updateInstructor,
   deleteInstructor,
   createInstructorWithUser,
-
-  // NEW for assignment
   listAssignedCourses,
   assignInstructorToCourse,
   unassignInstructorFromCourse,
+
+  // students (NEW)
+  listStudents,
+  getStudentById,
+  createStudent,
+  updateStudentProfile,
+  deleteStudent,
+  createStudentWithUser,
+  listStudentCourses,
+  enrollStudentToCourse,
+  unenrollStudentFromCourse,
 };
 
 export default AdminService;

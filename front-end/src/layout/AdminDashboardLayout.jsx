@@ -16,33 +16,43 @@ export default function AdminDashboardLayout() {
   return (
     <div className="container-fluid p-0 student-shell">
       {/* Sidebar */}
-      <aside className="student-sidebar border-end bg-dark text-white">
-        <div className="px-3 py-3 d-flex align-items-center gap-2 border-bottom border-secondary">
-          <div className="brand-icon rounded bg-primary text-white fw-bold d-grid place-center">
-            SL
+      <aside
+        className="student-sidebar border-end bg-dark text-white d-flex flex-column"
+        style={{ position: "sticky", top: 0, height: "100vh" }}
+      >
+        {/* Scrollable content */}
+        <div className="flex-grow-1 overflow-auto">
+          <div className="px-3 py-3 d-flex align-items-center gap-2 border-bottom border-secondary">
+            <div className="brand-icon rounded bg-primary text-white fw-bold d-grid place-center">
+              SL
+            </div>
+            <div className="fw-semibold">University of Kelaniya</div>
           </div>
-          <div className="fw-semibold">University of Kelaniya</div>
-        </div>
 
-        <div className="p-3">
-          <div className="d-flex align-items-start gap-2">
-            <div className="avatar rounded-circle bg-secondary text-white fw-bold">AD</div>
-            <div className="min-w-0">
-              <div className="fw-semibold small text-truncate text-white">Administrator</div>
-              <div className="text-light small text-truncate">admin@university.edu</div>
-              <span className="badge rounded-pill text-bg-primary mt-1">ADMIN</span>
+          <div className="p-3">
+            <div className="d-flex align-items-start gap-2">
+              <div className="avatar rounded-circle bg-secondary text-white fw-bold">AD</div>
+              <div className="min-w-0">
+                <div className="fw-semibold small text-truncate text-white">Administrator</div>
+                <div className="text-light small text-truncate">admin@university.edu</div>
+                <span className="badge rounded-pill text-bg-primary mt-1">ADMIN</span>
+              </div>
             </div>
           </div>
+
+          <nav className="nav flex-column px-2">
+            <NavLink to="/admin/dashboard" className="nav-link text-white">Dashboard</NavLink>
+            <NavLink to="/admin/courses" className="nav-link text-white">Course Management</NavLink>
+            <NavLink to="/admin/instructors" className="nav-link text-white">Instructor Management</NavLink>
+            <NavLink to="/admin/students" className="nav-link text-white">Student Management</NavLink>
+          </nav>
         </div>
 
-        <nav className="nav flex-column px-2">
-          <NavLink to="/admin/dashboard" className="nav-link text-white">Dashboard</NavLink>
-          <NavLink to="/admin/courses" className="nav-link text-white">Course Management</NavLink>
-          <NavLink to="/admin/instructors" className="nav-link text-white">Instructor Management</NavLink>
-          <NavLink to="/admin/students" className="nav-link text-white">Student Management</NavLink>
-        </nav>
-
-        <div className="mt-auto p-3 small border-top border-secondary">
+        {/* Always-visible footer with Logout */}
+        <div
+          className="p-3 small border-top border-secondary"
+          style={{ position: "sticky", bottom: 0, backgroundColor: "#212529" }}
+        >
           <button className="btn btn-outline-light w-100" onClick={onLogout}>Logout</button>
         </div>
       </aside>

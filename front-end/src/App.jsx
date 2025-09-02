@@ -18,16 +18,9 @@ import AdminCourseManagement from "./pages/admin/AdminCourseManagement.jsx";
 import Login from "./pages/auth/Login.jsx";
 import RequireAuth from "./pages/auth/RequireAuth.jsx";
 
-// // Temporary admin placeholders
-// const AdminInstructorManagement = () => (
-//   <div className="alert alert-secondary">Instructor Management (placeholder)</div>
-// );
-
 import AdminInstructorManagement from "./pages/admin/AdminInstructorManagement.jsx"; 
+import AdminStudentManagement from "./pages/admin/AdminStudentManagement.jsx";
 
-const AdminStudentManagement = () => (
-  <div className="alert alert-secondary">Student Management (placeholder)</div>
-);
 
 export default function App() {
   return (
