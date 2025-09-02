@@ -245,7 +245,7 @@ export default function AdminInstructorManagement() {
               <div className="modal-body">
                 <InstructorForm form={form} onChange={onChange} />
                 <div className="alert alert-info mt-3 mb-0 small">
-                  An AppUser will be created with role <strong>INSTRUCTOR</strong> and default password <code>instructor123</code>.
+                  An AppUser will be created with role <strong>INSTRUCTOR</strong> and default password <code>ChangeMe123!</code>
                 </div>
               </div>
               <div className="modal-footer">
