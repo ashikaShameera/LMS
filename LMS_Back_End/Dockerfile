@@ -1,16 +1,13 @@
-# --- build jar ---
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY pom.xml ./
-RUN mvn -q -e -DskipTests dependency:go-offline
-COPY src ./src
+COPY LMS_Back_End/pom.xml ./pom.xml
+RUN mvn -q -DskipTests dependency:go-offline
+COPY LMS_Back_End/src ./src
 RUN mvn -q -DskipTests clean package
 
-# --- run jar ---
-FROM eclipse-temurin:24-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-# App config via env (set in compose)
 ENV SPRING_PROFILES_ACTIVE=prod
+ENV JAVA_OPTS=""
 COPY --from=build /app/target/*.jar /app/app.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar --server.port=${PORT:-8080}"]
