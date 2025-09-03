@@ -249,7 +249,7 @@ export default function AdminStudentManagement() {
               <div className="modal-body">
                 <StudentForm form={form} onChange={onChangeNew} />
                 <div className="alert alert-info mt-3 mb-0 small">
-                  An AppUser will be created with role <strong>STUDENT</strong> and default password <code>student123</code>.
+                  An AppUser will be created with role <strong>STUDENT</strong> and default password <code>ChangeMe123!</code>.
                 </div>
               </div>
               <div className="modal-footer">
