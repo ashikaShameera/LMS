@@ -1,0 +1,54 @@
+# render.yaml (at repo root)
+services:
+  # ---- Backend: Spring Boot (Docker) ----
+  - type: web
+    name: lms-backend
+    runtime: docker
+    plan: free
+    rootDir: LMS_Back_End
+    dockerfilePath: LMS_Back_End/Dockerfile
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: lms-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: lms-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: lms-db
+          property: password
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: JWT_SECRET
+        # Generate a strong secret on each deploy (you can also set a fixed value in the dashboard)
+        generateValue: true
+
+  # ---- Frontend: Vite Static Site ----
+  - type: web
+    name: lms-frontend
+    runtime: static
+    plan: free
+    rootDir: front-end
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Make the frontend call the backend service URL
+      - key: VITE_API_URL
+        fromService:
+          name: lms-backend
+          type: web
+          property: url
+    routes:
+      # SPA fallback for React Router
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
+
+databases:
+  - name: lms-db
+    databaseName: lms
+    user: lms
+    plan: free
