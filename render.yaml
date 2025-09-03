@@ -5,7 +5,7 @@ services:
     name: lms-backend
     runtime: docker
     plan: starter                     # <- was 'free'; use 'starter' or remove the line
-    rootDir: LMS_Back_End
+    # rootDir: LMS_Back_End
     dockerfilePath: LMS_Back_End/Dockerfile
     envVars:
       - key: SPRING_DATASOURCE_URL
