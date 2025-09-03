@@ -5,7 +5,8 @@ RUN mvn -q -DskipTests dependency:go-offline
 COPY LMS_Back_End/src ./src
 RUN mvn -q -DskipTests clean package
 
-FROM eclipse-temurin:21-jre-alpine
+# FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV JAVA_OPTS=""
