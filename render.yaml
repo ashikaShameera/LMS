@@ -23,7 +23,6 @@ services:
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
         value: update
       - key: JWT_SECRET
-        # Generate a strong secret on each deploy (you can also set a fixed value in the dashboard)
         generateValue: true
 
   # ---- Frontend: Vite Static Site ----
@@ -32,15 +31,19 @@ services:
     runtime: static
     plan: free
     rootDir: front-end
-    buildCommand: npm ci && npm run build
+    # Build with VITE_API_URL constructed from backend host
+    buildCommand: >
+      sh -c "npm ci &&
+             export VITE_API_URL=https://$BACKEND_HOST &&
+             echo Building with VITE_API_URL=$VITE_API_URL &&
+             npm run build"
     staticPublishPath: dist
     envVars:
-      # Make the frontend call the backend service URL
-      - key: VITE_API_URL
+      - key: BACKEND_HOST
         fromService:
           name: lms-backend
           type: web
-          property: url
+          property: host
     routes:
       # SPA fallback for React Router
       - type: rewrite
