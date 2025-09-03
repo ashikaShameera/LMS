@@ -1,11 +1,12 @@
-# render.yaml (fixed)
+# render.yaml
 services:
+  # ---- Backend: Spring Boot (Docker) ----
   - type: web
     name: lms-backend
     runtime: docker
-    # plan: starter           # optional; you can omit to choose in UI
+    plan: starter                     # <- was 'free'; use 'starter' or remove the line
     rootDir: LMS_Back_End
-    dockerfilePath: Dockerfile   # <--- was LMS_Back_End/Dockerfile
+    dockerfilePath: LMS_Back_End/Dockerfile
     envVars:
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
@@ -23,12 +24,15 @@ services:
         value: update
       - key: JWT_SECRET
         generateValue: true
+      # optional but recommended: make Spring honor $PORT on Render
       - key: PORT
         value: "8080"
 
+  # ---- Frontend: Vite static site ----
   - type: web
     name: lms-frontend
     runtime: static
+    # (Remove plan here — some validators reject 'free' for static sites)
     rootDir: front-end
     buildCommand: >
       sh -c "npm ci &&
@@ -41,7 +45,7 @@ services:
         fromService:
           name: lms-backend
           type: web
-          property: host
+          property: host              # valid properties: host | port | hostport
     routes:
       - type: rewrite
         source: "/*"
@@ -49,6 +53,6 @@ services:
 
 databases:
   - name: lms-db
-  - databaseName: lms
+    databaseName: lms
     user: lms
     plan: free
