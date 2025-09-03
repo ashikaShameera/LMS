@@ -1,10 +1,10 @@
-# render.yaml (at repo root)
+# render.yaml
 services:
   # ---- Backend: Spring Boot (Docker) ----
   - type: web
     name: lms-backend
     runtime: docker
-    plan: free
+    plan: starter                     # <- was 'free'; use 'starter' or remove the line
     rootDir: LMS_Back_End
     dockerfilePath: LMS_Back_End/Dockerfile
     envVars:
@@ -24,14 +24,16 @@ services:
         value: update
       - key: JWT_SECRET
         generateValue: true
+      # optional but recommended: make Spring honor $PORT on Render
+      - key: PORT
+        value: "8080"
 
-  # ---- Frontend: Vite Static Site ----
+  # ---- Frontend: Vite static site ----
   - type: web
     name: lms-frontend
     runtime: static
-    plan: free
+    # (Remove plan here — some validators reject 'free' for static sites)
     rootDir: front-end
-    # Build with VITE_API_URL constructed from backend host
     buildCommand: >
       sh -c "npm ci &&
              export VITE_API_URL=https://$BACKEND_HOST &&
@@ -43,9 +45,8 @@ services:
         fromService:
           name: lms-backend
           type: web
-          property: host
+          property: host              # valid properties: host | port | hostport
     routes:
-      # SPA fallback for React Router
       - type: rewrite
         source: "/*"
         destination: "/index.html"
